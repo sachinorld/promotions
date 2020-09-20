@@ -28,6 +28,9 @@ public class CartServiceTest {
 	private static Item D;
 	private static CartService cartService;
 
+	/**
+	 * instantiate required objects before all test cases.
+	 */
 	@BeforeAll
 	public static void before() {
 		A = new Item("P_Trmmr_P100", 100.0);
@@ -37,6 +40,9 @@ public class CartServiceTest {
 		cartService = new CartService();
 	}
 
+	/**
+	 * adding to cart and verifying cart size
+	 */
 	@Test
 	void testAddToCart() {
 		Cart userCart = new Cart();
@@ -50,6 +56,9 @@ public class CartServiceTest {
 		}
 	}
 
+	/**
+	 * testing the ordering of items in the cart.
+	 */
 	@Test
 	void testCartOrdering() {
 		Cart userCart = new Cart();
@@ -64,6 +73,13 @@ public class CartServiceTest {
 		}
 	}
 
+	/**
+	 * Before and after applying promotion the cart prices are different.
+	 * 
+	 * 1'C item costs 200Rs. 5'C items in the cart = (5*200Rs)=1000Rs.
+	 * simple promotion of "2'C items for 300Rs" 
+	 * Final cart price = (2*300Rs+200Rs)=(600Rs+200Rs)=800Rs
+	 */
 	@Test
 	void testExecutePromotions() {
 		Cart userCart = new Cart();
@@ -124,6 +140,9 @@ public class CartServiceTest {
 
 	/**
 	 * re-applies promotion on a cart item which already has a promotion applied.
+	 * 1'C price before promotion = 200Rs
+	 * 1'C price after applying combined promotion with 1'D = 200Rs
+	 * The C cart price does not change to 0.0 as expected.
 	 */
 	@Test
 	void testReApplyPromotionOnSameItem() {
