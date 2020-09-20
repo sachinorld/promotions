@@ -1,5 +1,7 @@
 package com.promo.service;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,11 +57,13 @@ public class CartService implements ICartService {
 			//     promo has 1'C+1'D=45Rs
 			//     total price=55Rs. promoprice - 1'C=0, 1'D=45Rs
 			int size = promotion.getItems().size(); // 2
+			int promoAppliedCartSize = checkPromoAppliedCartItems(promotion, cartItems);
+			if (promoAppliedCartSize > 0) {
+				return cart;
+			}
 			for (int i = 0; i < size; i++) {
-				CartItem cartItem = cartItems.get(promotion.getItems().get(i).getSku());
-				if (promoApplied(cartItem))
-					break;
 				
+				CartItem cartItem = cartItems.get(promotion.getItems().get(i).getSku());
 				cartItem.setCartPrice(0); // C.price=0
 				if (i == size - 1) { // i=1
 					cartItem.setCartPrice(promotion.getPromoPrice()); // D.price=45
@@ -68,6 +72,15 @@ public class CartService implements ICartService {
 			}
 		}
 		return cart;
+	}
+
+	private int checkPromoAppliedCartItems(Promotion promotion, Map<String, CartItem> cartItems) {
+		List<CartItem> tempCartItems = new LinkedList<>();
+		for (Item i: promotion.getItems()) {
+			tempCartItems.add(cartItems.get(i.getSku()));
+		}
+		int promoAppliedCartSize = tempCartItems.stream().filter(CartItem::isPromoApplied).collect(Collectors.toList()).size();
+		return promoAppliedCartSize;
 	}
 
 	private boolean promoApplied(CartItem cartItem) {
