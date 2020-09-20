@@ -51,7 +51,7 @@ public class CartServiceTest {
 	}
 
 	@Test
-	void testCartOrder() {
+	void testCartOrdering() {
 		Cart userCart = new Cart();
 		try {
 			cartService.addToCart(userCart, A, 1);
@@ -85,6 +85,77 @@ public class CartServiceTest {
 		}
 		Assert.assertTrue(
 				userCart.getCartItems().values().stream().mapToDouble(i -> i.getCartPrice()).sum() == PROMO_PRICE);
+	}
+	
+	/**
+	 * combination promotion i.e. C+D promotion
+	 * 1C+2D in cart = 200Rs+2*200Rs = 600Rs.
+	 * 1C+1D in promotion of->1C+1D=300Rs
+	 * Then after applying promotion, total price = (1C+1D)+(1D)=300+200=500Rs
+	 */
+	@Test
+	void testExecutePromotionsOnCombinedItems() {
+		double PROMO_PRICE = 300.0;
+		Promotion combinedPromo = new Promotion("test1", PROMO_PRICE);
+		combinedPromo.addItem(C, 1);
+		combinedPromo.addItem(D, 1);
+
+		// Add to cart 1 C item and 2 D items
+		Cart userCart = new Cart();
+		try {
+			cartService.addToCart(userCart, C, 1);
+			cartService.addToCart(userCart, D, 2);
+		} catch (Exception e) {
+			fail("CartService.addToCart could not add item to cart " + e.getMessage());
+		}
+		// apply promotion
+		try {
+			cartService.executePromotions(userCart, combinedPromo);
+		} catch (Exception e) {
+			fail("CartService.executePromotions could not apply promotion " + e.getMessage());
+		}
+		Assert.assertTrue(
+				userCart.getCartItems().values().stream().mapToDouble(i -> i.getCartPrice()).sum() == PROMO_PRICE);
+	}
+	
+	/**
+	 * re-applies promotion on a cart item which already has a promotion applied.
+	 */
+	@Test
+	void testReApplyPromotionOnSameItem() {
+		// add 2D to cart
+		Cart userCart = new Cart();
+		try {
+			cartService.addToCart(userCart, D, 2);
+		} catch (Exception e) {
+			fail("CartService.addToCart could not add item to cart " + e.getMessage());
+		}
+		// apply promotion
+		Promotion promo = new Promotion("test2D", 350.0);
+		promo.addItem(D, 2);
+		try {
+			cartService.executePromotions(userCart, promo);
+		} catch (Exception e) {
+			fail("CartService.executePromotions could not apply promotion " + e.getMessage());
+		}
+		Assert.assertTrue(350.0 == userCart.getCartItems().get(D.getSku()).getCartPrice());
+		
+		// add C to cart
+		try {
+			cartService.addToCart(userCart, C, 1);
+		} catch (Exception e) {
+			fail("CartService.addToCart could not add item to cart " + e.getMessage());
+		}
+		// apply promotion for C+D combined
+		Promotion promoCombined = new Promotion("test1C1D", 350.0);
+		promoCombined.addItem(C, 1);
+		promoCombined.addItem(D, 1);
+		try {
+			cartService.executePromotions(userCart, promoCombined);
+		} catch (Exception e) {
+			fail("CartService.executePromotions could not apply promotion " + e.getMessage());
+		}
+		Assert.assertTrue(200.0 == userCart.getCartItems().get(C.getSku()).getCartPrice());
 	}
 
 }
