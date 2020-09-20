@@ -73,6 +73,14 @@ public class CartService implements ICartService {
 		return cart;
 	}
 
+	/**
+	 * returns the number of items with promotion already applied.
+	 * calculated only for items on which promotion is executed.
+	 * 
+	 * @param promotion
+	 * @param cartItems
+	 * @return
+	 */
 	private int checkPromoAppliedCartItems(Promotion promotion, Map<String, CartItem> cartItems) {
 		List<CartItem> tempCartItems = new LinkedList<>();
 		for (Item i: promotion.getItems()) {
@@ -86,6 +94,14 @@ public class CartService implements ICartService {
 		return cartItem.isPromoApplied();
 	}
 
+	/**
+	 * calculates price for one cart item based on cart quantity and promotion.
+	 * updates cart item with new price.
+	 * 
+	 * @param promotion
+	 * @param cartItem
+	 * @param promoItem
+	 */
 	private void updateCartItem(Promotion promotion, CartItem cartItem, Item promoItem) {
 		int promoQuantity = promoItem.getQuantity();//2
 		int cartQuantity = cartItem.getQuantity();//5
