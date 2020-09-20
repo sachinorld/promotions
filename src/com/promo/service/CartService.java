@@ -1,6 +1,5 @@
 package com.promo.service;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ public class CartService implements ICartService {
 				CartItem cartItem = cartItems.get(promotion.getItems().get(i).getSku());
 				cartItem.setCartPrice(0); // C.price=0
 				if (i == size - 1) { // i=1
-					cartItem.setCartPrice(promotion.getPromoPrice()); // D.price=45
+					updateCartItem(promotion, cartItem, promotion.getItems().get(i));
 				}
 				cartItem.setPromoApplied(true);
 			}
@@ -89,9 +88,9 @@ public class CartService implements ICartService {
 
 	private void updateCartItem(Promotion promotion, CartItem cartItem, Item promoItem) {
 		int promoQuantity = promoItem.getQuantity();//2
-		int presentQuantity = cartItem.getQuantity();//5
-		int applyTimes = presentQuantity / promoQuantity;// 5/2=2
-		int remainingQuantity = presentQuantity - applyTimes * promoQuantity;// 5-(2*2)=1
+		int cartQuantity = cartItem.getQuantity();//5
+		int applyTimes = promoQuantity == 1 ? 1 : cartQuantity / promoQuantity;// 5/2=2
+		int remainingQuantity = cartQuantity - applyTimes * promoQuantity;// 5-(2*2)=1
 		
 		double regularPrice = cartItem.getPrice();// 20
 		cartItem.setCartPrice((remainingQuantity * regularPrice) + (applyTimes * promotion.getPromoPrice()));
